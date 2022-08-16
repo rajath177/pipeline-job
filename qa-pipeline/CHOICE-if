@@ -1,0 +1,52 @@
+pipeline {
+    agent none
+
+    parameters {
+        choice(name: 'Stage', choices: ['Build','Deploy','Test'], description: 'Enter Stage Name ')
+    }
+
+    stages {
+        stage('Build') {
+            agent { label 'slave1' }
+            steps {
+                script {
+                    if (params.Stage == 'Build')
+                    {
+                        sh '''
+                            #!/bin/bash
+                            pwd
+                            ls
+                            echo "This is build stage"
+                        '''    
+                    }
+                }
+            }
+        }
+
+        stage('Deploy') {
+            agent { label 'slave2'}
+            steps {
+                script {
+                    if (params.Stage == 'Deploy')
+                    {
+                        sh 'echo "This is deploy stage"'
+                        sh 'ls -lrt'
+                    }
+                }
+            }
+        }
+
+        stage('Test') {
+            agent { label 'master'}
+            steps {
+                script {
+                    if (params.Stage == 'Test')
+                    {
+                        echo "This is test stage"
+                        sh 'ls -lt'
+                    }
+                }
+            }
+        }
+    }
+}
