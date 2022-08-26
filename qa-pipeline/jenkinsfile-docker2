@@ -12,7 +12,7 @@ pipeline{
         stage('Build') {
             steps{
                 git branch: 'main', url: 'https://github.com/rajath177/maven-tomcat.git'
-				sh 'docker build -t ${IMAGE_NAME} .'
+		sh 'docker build -t ${IMAGE_NAME} .'
             }
         }
         stage('Push') {
