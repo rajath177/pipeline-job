@@ -1,0 +1,20 @@
+pipeline{
+    agent any
+    environment {
+        DOCKERHUB_CREDENTIALS=credentials('dockerhub')
+    }
+    stages{
+        stage('Build') {
+            steps{
+                git branch: 'main', url: 'https://github.com/rajath177/maven-tomcat.git'
+                sh '''
+				docker build -t maven-tomcat:2.0 .
+                docker tag maven-tomcat:2.0 rajath177/maven-tomcat:2.0
+				echo $DOCKERHUB_CREDENTIALS_PSW | docker login -u $DOCKERHUB_CREDENTIALS_USR --password-stdin
+                docker push rajath177/maven-tomcat:2.0
+				docker run -it -d --rm --name tomcat1 -p 8081:8080 rajath177/maven-tomcat:2.0
+				'''
+            }
+        }
+    }
+}

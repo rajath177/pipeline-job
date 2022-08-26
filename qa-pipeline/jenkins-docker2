@@ -1,0 +1,32 @@
+pipeline{
+    agent any
+    parameters {
+        string(name: 'IMAGE_NAME', description: 'Enter the image-name to build', defaultValue: 'rajath177/maven-tomcat:1.0')
+        string(name: 'CONTAINER_NAME', description: 'Enter the container-name to run', defaultValue: 'tomcat1')
+        string(name: 'PORT_NO', description: 'Enter the port no to map', defaultValue: '8081')
+    }
+    environment {
+        DOCKERHUB_CREDENTIALS=credentials('dockerhub')
+    }
+    stages{
+        stage('Build') {
+            steps{
+                git branch: 'main', url: 'https://github.com/rajath177/maven-tomcat.git'
+				sh 'docker build -t ${IMAGE_NAME} .'
+            }
+        }
+        stage('Push') {
+            steps {
+                sh '''
+                    echo $DOCKERHUB_CREDENTIALS_PSW | docker login -u $DOCKERHUB_CREDENTIALS_USR --password-stdin
+                    docker push ${IMAGE_NAME}
+                '''
+            }
+        }        
+        stage('Run') {
+            steps {
+                sh 'docker run -it -d --rm --name ${CONTAINER_NAME} -p ${PORT_NO}:8080 ${IMAGE_NAME}'
+            }
+        }    
+    }
+}
